@@ -1,0 +1,9 @@
+[package]
+name = "libyuv-sys"
+version = "0.1.0"
+authors = ["Tae-il Lim <trlim@allwinnerkorea.com>"]
+
+[dependencies]
+
+[build-dependencies]
+bindgen = "0.31"
