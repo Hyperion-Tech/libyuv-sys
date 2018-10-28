@@ -6,4 +6,5 @@ authors = ["Tae-il Lim <trlim@allwinnerkorea.com>"]
 [dependencies]
 
 [build-dependencies]
-bindgen = "0.31"
+bindgen = "0.43"
+cc = "1.0"

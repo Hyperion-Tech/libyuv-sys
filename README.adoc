@@ -1,0 +1,9 @@
+= libyuv-sys
+
+== Build
+
+.Cross compiling
+----
+export CROSS_COMPILE=my-toolchain-prefix/arm-linux-gnueabihf-
+cargo build --target=armv7-unknown-linux-gnueabihf
+----
