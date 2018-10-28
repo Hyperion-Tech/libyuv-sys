@@ -2,6 +2,17 @@
 name = "libyuv-sys"
 version = "0.1.0"
 authors = ["Tae-il Lim <trlim@allwinnerkorea.com>"]
+description = "FFI bindings to libyuv"
+homepage = "https://github.com/trlim/libyuv-sys"
+repository = "https://github.com/trlim/libyuv-sys"
+readme = "README.adoc"
+keywords = ["yuv", "ffi", "bindings"]
+categories = [
+    "external-ffi-bindings",
+    "multimedia::images",
+    "multimedia::video",
+]
+license = "MIT/Apache-2.0"
 
 [dependencies]
 
