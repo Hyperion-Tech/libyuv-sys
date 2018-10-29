@@ -1,27 +1,35 @@
 extern crate bindgen;
 extern crate cc;
+#[cfg(feature="bundled")]
 extern crate cmake;
 
 use std::env;
+#[cfg(feature="bundled")]
 use std::fs;
+#[cfg(feature="bundled")]
 use std::io;
 use std::path::PathBuf;
+#[cfg(feature="bundled")]
 use std::process::Command;
 
+#[cfg(feature="bundled")]
 fn output_dir() -> PathBuf {
     PathBuf::from(env::var("OUT_DIR").unwrap())
 }
 
+#[cfg(feature="bundled")]
 fn search_dir() -> PathBuf {
     let mut absolute = env::current_dir().unwrap();
     absolute.push(&output_dir());
     absolute
 }
 
+#[cfg(feature="bundled")]
 fn source_dir() -> PathBuf {
     output_dir().join("libyuv")
 }
 
+#[cfg(feature="bundled")]
 fn fetch() -> io::Result<()> {
     let status = Command::new("git")
         .current_dir(&output_dir())
@@ -37,9 +45,10 @@ fn fetch() -> io::Result<()> {
 }
 
 fn main() {
-    let statik = env::var("CARGO_FEATURE_STATIC").is_ok();
+    #[cfg(feature="bundled")]
+    let include_paths: Vec<PathBuf> = {
+        let statik = cfg!(feature = "static-link");
 
-    let include_paths: Vec<PathBuf> = if env::var("CARGO_FEATURE_BUILD").is_ok() {
         println!(
             "cargo:rustc-link-search=native={}",
             search_dir().join("lib").to_string_lossy()
@@ -59,7 +68,10 @@ fn main() {
         cmake::Config::new(source_dir()).build();
 
         vec![search_dir().join("include")]
-    } else {
+    };
+
+    #[cfg(not(feature="bundled"))]
+    let include_paths: Vec<PathBuf> = {
         println!("cargo:rustc-link-lib=yuv");
 
         Vec::new()
