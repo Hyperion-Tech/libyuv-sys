@@ -19,3 +19,8 @@ license = "MIT/Apache-2.0"
 [build-dependencies]
 bindgen = "0.43"
 cc = "1.0"
+cmake = "0.1"
+
+[features]
+static = []
+build = ["static"]
