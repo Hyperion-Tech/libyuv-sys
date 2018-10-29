@@ -65,7 +65,11 @@ fn main() {
             fetch().unwrap();
         }
 
-        cmake::Config::new(source_dir()).build();
+        if (statik && fs::metadata(&search_dir().join("lib").join("libyuv.a")).is_err())
+            || (!statik && fs::metadata(&search_dir().join("lib").join("libyuv.so")).is_err())
+        {
+            cmake::Config::new(source_dir()).build();
+        }
 
         vec![search_dir().join("include")]
     };
