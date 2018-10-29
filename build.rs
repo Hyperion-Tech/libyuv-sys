@@ -76,7 +76,9 @@ fn main() {
 
     let mut bindgen = bindgen::Builder::default()
         .header("wrapper.h")
-        .trust_clang_mangling(false);
+        .trust_clang_mangling(false)
+        .blacklist_type("max_align_t") // Until https://github.com/rust-lang-nursery/rust-bindgen/issues/550 gets fixed
+        ;
 
     if let Some(path) = sysroot {
         bindgen = bindgen.clang_arg(format!("--sysroot={}", path));
