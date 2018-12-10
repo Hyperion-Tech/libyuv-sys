@@ -10,9 +10,8 @@ use std::fs;
 use std::io;
 use std::path::PathBuf;
 #[cfg(feature="bundled")]
-use std::process::Command;
+use std::process::{ExitStatus, Command};
 
-#[cfg(feature="bundled")]
 fn output_dir() -> PathBuf {
     PathBuf::from(env::var("OUT_DIR").unwrap())
 }
@@ -30,18 +29,12 @@ fn source_dir() -> PathBuf {
 }
 
 #[cfg(feature="bundled")]
-fn fetch() -> io::Result<()> {
-    let status = Command::new("git")
+fn fetch() -> io::Result<ExitStatus> {
+    Command::new("git")
         .current_dir(&output_dir())
         .arg("clone")
         .arg("https://chromium.googlesource.com/libyuv/libyuv")
-        .status()?;
-
-    if status.success() {
-        Ok(())
-    } else {
-        Err(io::Error::new(io::ErrorKind::Other, "fetch failed"))
-    }
+        .status()
 }
 
 fn main() {
@@ -62,7 +55,7 @@ fn main() {
             fs::create_dir_all(&output_dir())
                 .ok()
                 .expect("failed to create build directory");
-            fetch().unwrap();
+            fetch().expect("Unable to fetch libyuv");
         }
 
         if (statik && fs::metadata(&search_dir().join("lib").join("libyuv.a")).is_err())
@@ -108,7 +101,7 @@ fn main() {
 
     let bindings = bindgen.generate().expect("Unable to generate bindings");
 
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let out_path = output_dir();
     bindings
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
