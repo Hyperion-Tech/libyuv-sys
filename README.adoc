@@ -4,9 +4,19 @@ Rust FFI bindings for libyuv.
 
 == Build
 
-.Using static library built from the latest commit
+.With system libyuv
 ----
-cargo build --features=build
+cargo build
+----
+
+.With static library built from bundled submodule
+----
+cargo build --features "bundled"
+----
+
+.With static library built from the latest commit
+----
+cargo build --features "fetched"
 ----
 
 .Cross compiling with custom toolchain
