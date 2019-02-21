@@ -25,7 +25,9 @@ version = "0.1"
 optional = true
 
 [features]
-default = ["bundled"]
+default = []
 
+build = ["cmake"]
 static-link = []
-bundled = ["cmake", "static-link"]
+bundled = ["build", "static-link"]
+fetched = ["build", "static-link"]

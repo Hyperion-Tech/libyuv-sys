@@ -1,23 +1,15 @@
-extern crate bindgen;
-extern crate cc;
-#[cfg(feature="bundled")]
+#[cfg(feature="build")]
 extern crate cmake;
 
 use std::env;
-#[cfg(feature="bundled")]
-use std::fs;
-#[cfg(feature="bundled")]
-use std::io;
 use std::path::PathBuf;
-#[cfg(feature="bundled")]
-use std::process::{ExitStatus, Command};
 
 fn output_dir() -> PathBuf {
     PathBuf::from(env::var("OUT_DIR").unwrap())
 }
 
-#[cfg(feature="bundled")]
-fn search_dir() -> PathBuf {
+#[cfg(feature="build")]
+fn build_dir() -> PathBuf {
     let mut absolute = env::current_dir().unwrap();
     absolute.push(&output_dir());
     absolute
@@ -25,12 +17,17 @@ fn search_dir() -> PathBuf {
 
 #[cfg(feature="bundled")]
 fn source_dir() -> PathBuf {
+    env::current_dir().unwrap().join("libyuv")
+}
+
+#[cfg(feature="fetched")]
+fn source_dir() -> PathBuf {
     output_dir().join("libyuv")
 }
 
-#[cfg(feature="bundled")]
-fn fetch() -> io::Result<ExitStatus> {
-    Command::new("git")
+#[cfg(feature="fetched")]
+fn fetch() -> std::io::Result<std::process::ExitStatus> {
+    std::process::Command::new("git")
         .current_dir(&output_dir())
         .arg("clone")
         .arg("https://chromium.googlesource.com/libyuv/libyuv")
@@ -38,36 +35,41 @@ fn fetch() -> io::Result<ExitStatus> {
 }
 
 fn main() {
-    #[cfg(feature="bundled")]
+    #[cfg(feature="build")]
     let include_paths: Vec<PathBuf> = {
+        use std::fs;
+
         let statik = cfg!(feature = "static-link");
 
         println!(
             "cargo:rustc-link-search=native={}",
-            search_dir().join("lib").to_string_lossy()
+            build_dir().join("lib").to_string_lossy()
         );
 
         let kind = if statik { "static" } else { "dylib" };
 
         println!("cargo:rustc-link-lib={}=yuv", kind);
 
-        if fs::metadata(&search_dir().join("libyuv")).is_err() {
-            fs::create_dir_all(&output_dir())
-                .ok()
-                .expect("failed to create build directory");
-            fetch().expect("Unable to fetch libyuv");
+        #[cfg(feature="fetched")]
+        {
+            if fs::metadata(&build_dir().join("libyuv")).is_err() {
+                fs::create_dir_all(&output_dir())
+                    .ok()
+                    .expect("failed to create build directory");
+
+                fetch().expect("Unable to fetch libyuv");
+            }
         }
 
-        if (statik && fs::metadata(&search_dir().join("lib").join("libyuv.a")).is_err())
-            || (!statik && fs::metadata(&search_dir().join("lib").join("libyuv.so")).is_err())
+        if (statik && fs::metadata(&build_dir().join("lib").join("libyuv.a")).is_err())
+            || (!statik && fs::metadata(&build_dir().join("lib").join("libyuv.so")).is_err())
         {
             cmake::Config::new(source_dir()).build();
         }
 
-        vec![search_dir().join("include")]
+        vec![build_dir().join("include")]
     };
-
-    #[cfg(not(feature="bundled"))]
+    #[cfg(not(feature="build"))]
     let include_paths: Vec<PathBuf> = {
         println!("cargo:rustc-link-lib=yuv");
 
